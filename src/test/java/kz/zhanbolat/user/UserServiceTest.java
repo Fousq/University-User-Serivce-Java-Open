@@ -1,6 +1,7 @@
 package kz.zhanbolat.user;
 
 import kz.zhanbolat.user.entity.User;
+import kz.zhanbolat.user.exception.AuthenticationException;
 import kz.zhanbolat.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +144,37 @@ public class UserServiceTest {
             assertThrows(IllegalArgumentException.class, () -> userService.updateUser(nullUsername));
             assertThrows(IllegalArgumentException.class, () -> userService.updateUser(emptyPassword));
             assertThrows(IllegalArgumentException.class, () -> userService.updateUser(nullPassword));
+        });
+    }
+
+    @Test
+    public void givenExistedUsernameAndPassword_whenAuthenticateUser_thenReturnUser() {
+        User expectedUser = new User();
+        expectedUser.setId(1L);
+        expectedUser.setUsername("test_user");
+        expectedUser.setPassword("test_password");
+
+        User user = userService.authenticateUser("test_user", "test_password");
+
+        assertEquals(expectedUser, user);
+    }
+
+    @Test
+    public void givenNullOrEmpty_whenAuthenticateUser_thenThrowException() {
+        assertAll(() -> {
+            assertThrows(IllegalArgumentException.class, () -> userService.authenticateUser(null, null));
+            assertThrows(IllegalArgumentException.class, () -> userService.authenticateUser("", null));
+            assertThrows(IllegalArgumentException.class, () -> userService.authenticateUser(null, ""));
+            assertThrows(IllegalArgumentException.class, () -> userService.authenticateUser("", ""));
+        });
+    }
+
+    @Test
+    public void givenNotExistedUsernameOrPassword_whenAuthenticateUser_thenThrowException() {
+        assertAll(() -> {
+            assertThrows(AuthenticationException.class, () -> userService.authenticateUser("not_existing", "not_existing"));
+            assertThrows(AuthenticationException.class, () -> userService.authenticateUser("test_user", "not_existing"));
+            assertThrows(AuthenticationException.class, () -> userService.authenticateUser("not_existing", "test_password"));
         });
     }
 }

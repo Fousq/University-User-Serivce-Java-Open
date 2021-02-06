@@ -1,6 +1,7 @@
 package kz.zhanbolat.user.service;
 
 import kz.zhanbolat.user.entity.User;
+import kz.zhanbolat.user.exception.AuthenticationException;
 import kz.zhanbolat.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,15 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Cannot update not existing user");
         }
         return userRepository.save(user);
+    }
+
+    @Override
+    public User authenticateUser(String username, String password) {
+        if (isStringEmpty(username) || isStringEmpty(password)) {
+            throw new IllegalArgumentException("Username or password cannot be null");
+        }
+        return userRepository.findByUsernameAndPassword(username, password)
+                .orElseThrow(() -> new AuthenticationException("User with such username or password does not exists"));
     }
 
     private boolean isStringEmpty(String string) {

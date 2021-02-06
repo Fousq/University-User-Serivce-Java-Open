@@ -30,6 +30,11 @@ public class UserController {
         return userService.updateUser(user);
     }
 
+    @PostMapping("/auth")
+    public User authenticateUser(User user) {
+        return userService.authenticateUser(user.getUsername(), user.getPassword());
+    }
+
     @ExceptionHandler
     public ErrorResponse handleException(Exception exception) {
         logger.error("Caught exception: " + exception);
